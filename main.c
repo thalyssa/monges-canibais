@@ -29,24 +29,35 @@ struct binaryTree{
 	binaryTree *left;	
 };
 
+//-----FUNÇÕES DÉ NÓ(FILA)-----
 node* createNode(int mLeft, int cLeft, int mRight, int cRight);
+//-----FUNÇÕES DE FILA-----
 queue *create_queue();
 bool isEmpty(queue *q);
 void enqueue(queue *q, int mLeft, int cLeft, int mRight, int cRight);
+int search(queue *q, int mLeft, int cLeft, int mRight, int cRight);
+void print_queue(queue *q);
+//-----FUNÇÕES DE NÓ(ÁRVORE BINÁRIA)-----
 auxNode* createAuxNode(int c, int m);
+//-----FUNÇÕES DE ÁRVORE BINÁRIA-----
 binaryTree* creatEmptyBtree();
 binaryTree* createBtree(int mLeft, int cLeft, int mRight, int cRight, binaryTree *right, binaryTree *left);
 int check(int mLeft, int cLeft, int mRight, int cRight);
 void mapTree(int mLeft, int cLeft, int mRight, int cRight, binaryTree *tree, queue *q);
+void findPath(binaryTree *tree, int flag, queue *q);
 
 //-----MAIN-----
 int main(){
 
 	binaryTree *tree = creatEmptyBtree();
 	queue *q = create_queue();
+	queue *path = create_queue();
+	int flag = 0;
 	printf("-----CAMINHO-----\n");
 	mapTree(3,3,0,0,tree,q);
-	print_queue(q);
+	findPath(tree, flag, path);
+	//print_queue(path);
+	
 	return 0;
 }
 
@@ -186,9 +197,7 @@ void mapTree(int mLeft, int cLeft, int mRight, int cRight, binaryTree *tree, que
 			tree = createBtree(mLeft,cLeft, mRight, cRight, NULL, NULL);
 			enqueue(q, mLeft, cLeft, mRight, cRight);
 
-			/*if(mLeft==0 && cLeft==0 && mRight==3 && mLeft == 3){
-				print_queue(q);
-			}else{*///Calcular os próximos caminhos
+			//Calcular os próximos caminhos
 				//Da esquerda para a direita
 					//Dois missionarios
 				mapTree(mLeft-2, cLeft, mRight+2, cRight, tree->right, q);
@@ -209,6 +218,32 @@ void mapTree(int mLeft, int cLeft, int mRight, int cRight, binaryTree *tree, que
 					//Um de cada
 				mapTree(mLeft+1, cLeft+1, mRight-1, cRight-1, tree->right, q);
 			}//Fim else próximos caminhos
-		}//Fim else search		
-	}//Fim if check
-//}
+		}//Fim if check		
+	}//Fim função
+
+void findPath(binaryTree *tree, int flag, queue *q){
+	//printf("FindPath\n");
+	if(tree->mLeft->missionarios == 0 && tree->mLeft->canibais == 0 && tree->mRight->missionarios == 3 && tree->mRight->canibais == 3){
+		//enqueue(queue *q, int mLeft, int cLeft, int mRight, int cRight)
+		printf("PrevPath\n");
+		enqueue(q, tree->mLeft->missionarios, tree->mLeft->canibais, tree->mRight->missionarios, tree->mRight->canibais);
+		flag = 1;
+		printf("Flag ativada\n");
+	}else{
+		printf("Path\n");
+		findPath(tree->left, flag, q);
+		printf("Path esquerdo\n");
+		if(flag == 1){
+			enqueue(q, tree->left->mLeft->missionarios, tree->left->mLeft->canibais, tree->left->mRight->missionarios, tree->left->mRight->canibais);
+			printf("Path esquerdo -qFlag\n");
+			return;
+		}
+		findPath(tree->right, flag, q);
+		printf("Path direito\n");
+		if(flag == 1){
+			enqueue(q, tree->right->mLeft->missionarios, tree->right->mLeft->canibais, tree->right->mRight->missionarios, tree->right->mRight->canibais);
+			printf("Path direito -qFlag\n");
+			return;
+		}
+	}
+}
